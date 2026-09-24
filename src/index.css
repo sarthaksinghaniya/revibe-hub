@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 140 30% 97%;
+    --foreground: 160 30% 15%;
+
+    --card: 150 25% 95%;
+    --card-foreground: 160 30% 15%;
+
+    --popover: 150 25% 95%;
+    --popover-foreground: 160 30% 15%;
+
+    --primary: 162 55% 42%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 150 20% 90%;
+    --secondary-foreground: 160 30% 20%;
+
+    --muted: 140 15% 92%;
+    --muted-foreground: 160 12% 50%;
+
+    --accent: 162 55% 42%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 150 18% 88%;
+    --input: 150 18% 88%;
+    --ring: 162 55% 42%;
+
+    --radius: 1rem;
+
+    /* Category colors — pastel-vibrant */
+    --cat-recycle: 217 78% 62%;
+    --cat-compost: 162 55% 42%;
+    --cat-hazard: 24 85% 58%;
+    --cat-landfill: 220 12% 58%;
+    --cat-upcycle: 271 65% 60%;
+
+    /* Surface variants */
+    --surface: 150 25% 95%;
+    --surface-alt: 140 20% 93%;
+
+    /* Glow effects — softer for light theme */
+    --glow-primary: 0 0 24px hsl(162 55% 42% / 0.18);
+    --glow-recycle: 0 0 16px hsl(217 78% 62% / 0.2);
+    --glow-compost: 0 0 16px hsl(162 55% 42% / 0.2);
+    --glow-hazard: 0 0 16px hsl(24 85% 58% / 0.2);
+    --glow-upcycle: 0 0 16px hsl(271 65% 60% / 0.2);
+
+    --sidebar-background: 150 25% 95%;
+    --sidebar-foreground: 160 30% 15%;
+    --sidebar-primary: 162 55% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 150 20% 90%;
+    --sidebar-accent-foreground: 160 30% 20%;
+    --sidebar-border: 150 18% 88%;
+    --sidebar-ring: 162 55% 42%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Instrument Sans', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  code, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .font-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .font-body {
+    font-family: 'Instrument Sans', sans-serif;
+  }
+
+  .font-data {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  .scan-line {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      hsl(162 55% 42% / 0.08) 40%,
+      hsl(162 55% 42% / 0.4) 50%,
+      hsl(162 55% 42% / 0.08) 60%,
+      transparent 100%
+    );
+  }
+
+  .glass-card {
+    background: hsl(0 0% 100% / 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid hsl(150 18% 88% / 0.8);
+    box-shadow: 0 2px 16px hsl(160 20% 40% / 0.06);
+  }
+
+  .noise-texture {
+    position: relative;
+  }
+  .noise-texture::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.02;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+  }
+}

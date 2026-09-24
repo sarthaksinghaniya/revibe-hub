@@ -1,0 +1,4 @@
+project_id = "hcfxyulybcuoabxmfodm"
+
+[functions.overpass-proxy]
+verify_jwt = false

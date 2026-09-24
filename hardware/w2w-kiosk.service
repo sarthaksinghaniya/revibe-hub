@@ -1,0 +1,18 @@
+[Unit]
+Description=W2W Smart AI Waste Kiosk Daemon (Raspberry Pi 4)
+After=network.target sound.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/hardware
+ExecStart=/usr/bin/python3 /home/pi/hardware/w2w_kiosk.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+Environment=GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+Environment=SUPABASE_URL=https://xyz.supabase.co
+Environment=SUPABASE_KEY=YOUR_SUPABASE_KEY
+
+[Install]
+WantedBy=multi-user.target
