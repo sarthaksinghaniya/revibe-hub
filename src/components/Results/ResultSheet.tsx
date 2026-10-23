@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Share2, RotateCcw, Leaf, ShoppingBag, Building2, Layers, Volume2, VolumeX, Globe, Play, Square, Sparkles, Gift } from "lucide-react";
+import { MapPin, Share2, RotateCcw, Leaf, ShoppingBag, Building2, Layers, Volume2, VolumeX, Globe, Play, Square, Sparkles, Gift, Truck } from "lucide-react";
 import CategoryBadge from "./CategoryBadge";
 import VideoSuggestions from "./VideoSuggestions";
 import ShareScanModal from "./ShareScanModal";
+import { ScrapPickupModal } from "@/components/ScrapPickupModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import type { MultiScanResult, ScanItem } from "@/lib/scanApi";
@@ -30,6 +31,46 @@ const categoryHindiMap: Record<string, string> = {
   upcyclable: "अपसाइकिल योग्य (Upcyclable)",
 };
 
+interface BinGuide {
+  label: string;
+  hindiLabel: string;
+  badgeClass: string;
+  iconBg: string;
+}
+
+const BIN_GUIDE: Record<string, BinGuide> = {
+  compostable: {
+    label: "Green Bin (Wet Waste)",
+    hindiLabel: "हरा डिब्बा (गीला कचरा)",
+    badgeClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    iconBg: "bg-emerald-500",
+  },
+  recyclable: {
+    label: "Blue Bin (Dry Recyclables)",
+    hindiLabel: "नीला डिब्बा (सूखा कचरा)",
+    badgeClass: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+    iconBg: "bg-blue-500",
+  },
+  upcyclable: {
+    label: "Blue Bin / Save to Upcycle",
+    hindiLabel: "नीला डिब्बा / पुनर्चक्रण",
+    badgeClass: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+    iconBg: "bg-purple-500",
+  },
+  hazardous: {
+    label: "Red Bin (Hazardous / E-Waste)",
+    hindiLabel: "लाल डिब्बा (हानिकारक अपशिष्ट)",
+    badgeClass: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+    iconBg: "bg-rose-500",
+  },
+  landfill: {
+    label: "Black Bin (Residual Landfill)",
+    hindiLabel: "काला डिब्बा (लैंडफिल कचरा)",
+    badgeClass: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
+    iconBg: "bg-zinc-500",
+  },
+};
+
 interface ResultSheetProps {
   result: MultiScanResult | null;
   onClose: () => void;
@@ -42,6 +83,7 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
   const { rewardState, registerScan } = useCashRewards();
 
   const [shareOpen, setShareOpen] = useState(false);
+  const [scrapOpen, setScrapOpen] = useState(false);
   const [city, setCity] = useState<string>("");
   const [unlockedBanner, setUnlockedBanner] = useState<boolean>(false);
   const registeredScanIdRef = useRef<string | null>(null);
@@ -227,6 +269,17 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
               <span className="text-[10px] font-data text-muted-foreground">{item.confidence}% match</span>
             </div>
             <p className="text-[10px] font-data text-muted-foreground mt-1">Material: {item.material}</p>
+            {(() => {
+              const bin = BIN_GUIDE[item.category] || BIN_GUIDE.landfill;
+              return (
+                <div className="mt-2">
+                  <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-data font-semibold border ${bin.badgeClass}`}>
+                    <span className={`w-2 h-2 rounded-full ${bin.iconBg}`} />
+                    {voiceLang === "hi" ? bin.hindiLabel : bin.label}
+                  </span>
+                </div>
+              );
+            })()}
           </div>
           <div className="text-right">
             <p className={`text-sm font-display font-bold tabular-nums ${item.reduced_credits ? "text-muted-foreground" : "text-primary"}`}>
@@ -503,6 +556,18 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
                 </button>
               </div>
 
+              {/* Doorstep Scrap Pickup Trigger */}
+              <button
+                onClick={() => {
+                  stopSpeaking();
+                  setScrapOpen(true);
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-display font-bold text-xs hover:bg-emerald-500/25 transition-colors mb-2"
+              >
+                <Truck size={14} />
+                Doorstep Scrap Pickup & Rates (Kabadiwala)
+              </button>
+
               {firstItem && (
                 <button
                   onClick={() => {
@@ -525,6 +590,12 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
         onClose={() => setShareOpen(false)}
         scanId={null}
         itemName={firstItem?.name || ""}
+      />
+
+      <ScrapPickupModal
+        open={scrapOpen}
+        onOpenChange={setScrapOpen}
+        defaultMaterial={firstItem?.material || firstItem?.name || ""}
       />
     </>
   );

@@ -1,13 +1,14 @@
 import { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, ImageIcon } from "lucide-react";
+import { Upload, ImageIcon, SwitchCamera } from "lucide-react";
 import { toast } from "sonner";
 import ScanLine from "@/components/Scanner/ScanLine";
 import ScanBrackets from "@/components/Scanner/ScanBrackets";
 import CaptureButton from "@/components/Scanner/CaptureButton";
 import ResultSheet from "@/components/Results/ResultSheet";
 import { scanWasteImage, type MultiScanResult } from "@/lib/scanApi";
+import { optimizeImageForAi } from "@/lib/imageOptimizer";
 
 const Scanner = () => {
   const webcamRef = useRef<Webcam>(null);
@@ -16,11 +17,20 @@ const Scanner = () => {
   const [result, setResult] = useState<MultiScanResult | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState(false);
+  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
 
   const processImage = async (imageSrc: string) => {
     setIsProcessing(true);
     try {
-      const scanResult = await scanWasteImage(imageSrc);
+      // Downscale and optimize to prevent multi-megabyte payloads
+      const optimized = await optimizeImageForAi(imageSrc, 1024, 0.82);
+      if (optimized.reductionPercentage > 0) {
+        console.debug(
+          `[W2W Optimizer] Compressed ${(optimized.originalBytes / 1024).toFixed(0)}KB → ${(optimized.compressedBytes / 1024).toFixed(0)}KB (-${optimized.reductionPercentage}%)`
+        );
+      }
+      setCapturedImage(optimized.dataUrl);
+      const scanResult = await scanWasteImage(optimized.dataUrl);
       setResult(scanResult);
     } catch (e) {
       console.error("Scan failed:", e);
@@ -60,6 +70,10 @@ const Scanner = () => {
     reader.readAsDataURL(file);
   };
 
+  const toggleCamera = () => {
+    setFacingMode((prev) => (prev === "environment" ? "user" : "environment"));
+  };
+
   const handleScanAgain = () => {
     setResult(null);
     setCapturedImage(null);
@@ -89,7 +103,7 @@ const Scanner = () => {
           <Webcam
             ref={webcamRef}
             screenshotFormat="image/jpeg"
-            videoConstraints={{ facingMode: "environment" }}
+            videoConstraints={{ facingMode }}
             className="w-full h-full object-cover"
             onUserMediaError={() => setCameraError(true)}
           />
@@ -151,11 +165,20 @@ const Scanner = () => {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="w-12 h-12 rounded-full bg-card/80 backdrop-blur border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                title="Upload Image from Gallery"
+                aria-label="Upload Image"
               >
                 <Upload size={18} />
               </button>
               <CaptureButton onCapture={handleCapture} isProcessing={isProcessing} />
-              <div className="w-12 h-12" /> {/* Spacer */}
+              <button
+                onClick={toggleCamera}
+                className="w-12 h-12 rounded-full bg-card/80 backdrop-blur border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                title="Switch Camera (Front/Back)"
+                aria-label="Switch Camera"
+              >
+                <SwitchCamera size={18} />
+              </button>
             </>
           )}
         </div>

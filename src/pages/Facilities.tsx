@@ -4,9 +4,38 @@ import { MapPin, Navigation, Locate, Loader2, CheckCircle2 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { co2GramsForItem, mintFromReservoir } from "@/lib/co2Formula";
 
 declare global {
   interface Window { L: any }
+}
+
+function loadLeaflet(): Promise<any> {
+  if (typeof window === "undefined") return Promise.resolve(null);
+  if ((window as any).L) return Promise.resolve((window as any).L);
+
+  if (!document.getElementById("leaflet-css")) {
+    const link = document.createElement("link");
+    link.id = "leaflet-css";
+    link.rel = "stylesheet";
+    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+    document.head.appendChild(link);
+  }
+
+  return new Promise((resolve) => {
+    const existing = document.getElementById("leaflet-js") as HTMLScriptElement;
+    if (existing) {
+      if ((window as any).L) return resolve((window as any).L);
+      existing.addEventListener("load", () => resolve((window as any).L));
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "leaflet-js";
+    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    script.onload = () => resolve((window as any).L);
+    script.onerror = () => resolve(null);
+    document.head.appendChild(script);
+  });
 }
 
 interface Facility {
@@ -101,6 +130,13 @@ const Facilities = () => {
   const [radius, setRadius] = useState<number>(5000);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const [leafletReady, setLeafletReady] = useState(false);
+
+  useEffect(() => {
+    loadLeaflet().then((L) => {
+      if (L) setLeafletReady(true);
+    });
+  }, []);
 
   const [dropoffOpen, setDropoffOpen] = useState(false);
   const [dropoffFacility, setDropoffFacility] = useState<Facility | null>(null);
@@ -225,7 +261,7 @@ const Facilities = () => {
 
   // Initialize Leaflet map
   useEffect(() => {
-    if (!coords || !mapRef.current || mapInstance.current) return;
+    if (!coords || !mapRef.current || mapInstance.current || !leafletReady) return;
     const L = window.L;
     if (!L) return;
 
@@ -246,7 +282,7 @@ const Facilities = () => {
       fillOpacity: 0.7,
       weight: 2,
     }).addTo(map).bindPopup("You are here");
-  }, [coords]);
+  }, [coords, leafletReady]);
 
   // Re-center when coords change
   useEffect(() => {
@@ -258,7 +294,7 @@ const Facilities = () => {
   // Render markers
   useEffect(() => {
     const L = window.L;
-    if (!L || !mapInstance.current || !markersLayer.current) return;
+    if (!L || !mapInstance.current || !markersLayer.current || !leafletReady) return;
     markersLayer.current.clearLayers();
 
     const visible = facilities.filter((f) =>
@@ -309,7 +345,6 @@ const Facilities = () => {
     if (!user || !dropoffFacility) return;
     const cat = CATEGORIES.find((c) => c.key === categoryKey)!;
     // Use new CO2-grams formula with verified ×2 multiplier
-    const { co2GramsForItem, mintFromReservoir } = await import("@/lib/co2Formula");
     const co2G = co2GramsForItem(categoryKey as any, true);
 
     try {

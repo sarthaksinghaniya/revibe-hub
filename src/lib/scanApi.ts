@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
-
 import { co2GramsForItem, mintFromReservoir, type Category } from "./co2Formula";
+import { optimizeImageForAi } from "./imageOptimizer";
 
 export interface ScanItem {
   name: string;
@@ -55,11 +55,14 @@ async function callGroqVision(
 
 // ── Main export (all credits / dedup / streak logic unchanged) ───────────────
 export async function scanWasteImage(imageBase64: string): Promise<MultiScanResult> {
+  const optimized = await optimizeImageForAi(imageBase64, 1024, 0.82);
+  const payloadImage = optimized.dataUrl;
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const imgHash = hashImage(imageBase64);
+  const imgHash = hashImage(payloadImage);
 
   // Dedup check: same hash within last 24h for this user
   if (user) {
@@ -79,7 +82,7 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
   }
 
   // ── AI call via Groq ─────────────────────────────────────────────────────
-  const groqData = await callGroqVision(imageBase64);
+  const groqData = await callGroqVision(payloadImage);
   const items: any[] = groqData.items;
   const scanType: "single" | "multi" =
     groqData.scan_type || (items.length > 1 ? "multi" : "single");
