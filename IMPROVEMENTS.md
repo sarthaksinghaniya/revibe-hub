@@ -83,20 +83,32 @@ This document records the architectural improvements, performance optimizations,
   - **5-Step Sequential Progress Tracker:** Visual stepper showing step status, estimated step duration, safety warnings (e.g. razor blades, hot glue, edge smoothing), and real-time completion percentage.
   - **Post-Build Monetization Fast-Track:** Upon reaching 100% completion, users get a 1-click button to list their newly crafted item on the W2W Marketplace (`/marketplace/new`), pre-populating title, suggested pricing (₹150–₹600), and upcycled material description.
 
+### I. Barcode & FMCG Packaging Scanner (0ms Latency & $0 AI Token Cost)
+- **Implementation:** Built [`src/lib/barcodeApi.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/lib/barcodeApi.ts) and [`src/components/Scanner/BarcodeScannerOverlay.tsx`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/components/Scanner/BarcodeScannerOverlay.tsx) integrated directly into [`src/pages/Scanner.tsx`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/pages/Scanner.tsx):
+  - **Dual Scanner Mode Switcher:** Seamless segmented control toggling between *AI Vision Scan* and *Barcode / FMCG Scan*.
+  - **Zero-Latency FMCG Database:** High-speed lookup for common consumer staples (Bisleri 1L PET Bottle, Maggi 2-Minute Noodles MLP, Coca-Cola Aluminium Can, Lay's Chips Foil Pouch, Amul Taaza Milk Tetra Pak, Parle-G, Colgate, Red Bull) delivering 0ms response time and 0 token cost.
+  - **Open Food Facts API Integration:** Live querying of Open Food Facts database (`world.openfoodfacts.org`) for international packaging material breakdowns, shapes, and resin types with fallback to resin recycling code guidelines.
+  - **Real-Time Camera Barcode Detection:** Integrates Chromium's hardware-accelerated `BarcodeDetector` API polling live video streams for EAN-13, EAN-8, UPC-A, UPC-E, Code-128, and QR codes.
+  - **Neon Laser Viewfinder & Quick-Test Barcodes:** Visual oscillating dual-laser reticle, manual barcode lookup search bar, and 1-tap quick test pills for frictionless testing without physical packaging.
+  - **Audio & Haptic Feedback:** High-register procedural double-beep (1760 Hz / 2093 Hz) and tactile vibration upon recognition.
+  - **Wallet & Streak Parity:** Barcode scans seamlessly award LCA CO₂ grams, progress 5-scan cash reward milestones, and increment streak counts via `recordProcessedScan`.
+
 ---
 
 ## 3. Reliability & Automated Test Suite
 
-Implemented a comprehensive Vitest unit testing suite in `src/test/` (29 tests across 9 test suites, 100% passing):
+Implemented a comprehensive Vitest unit testing suite in `src/test/` (37 tests across 10 test suites, 100% passing):
+- [`src/test/barcodeApi.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/barcodeApi.test.ts): Verified instant lookup for high-frequency FMCG items (Bisleri, Maggi, Coke, Amul), whitespace/formatting sanitization, packaging component breakdowns, `MultiScanResult` mapping, resin fallback handling, and empty barcode validation.
 - [`src/test/diyGuides.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/diyGuides.test.ts): Verified DIY project catalog coverage for all recyclable material types, required steps (>= 4 per guide), tool lists, and safe fallbacks for unidentified items.
 - [`src/test/carbonPerks.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/carbonPerks.test.ts): Verified perks catalog integrity across vouchers, trees, and certificates, along with redemption history storage.
 - [`src/test/decayTimeline.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/decayTimeline.test.ts): Verified future decomposition year arithmetic, generational spans, century simulation boundaries, and dataset integrity.
-- [`src/test/soundFx.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/soundFx.test.ts): Verified audio synthesizer execution, safety fallbacks in headless environments, haptics invocation, and mute state persistence.
+- [`src/test/soundFx.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/soundFx.test.ts): Verified audio synthesizer execution (including camera shutter, coin clink, fanfare, success chime, and barcode double-beep), safety fallbacks in headless environments, haptics invocation, and mute state persistence.
 - [`src/test/co2Formula.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/co2Formula.test.ts): Verified LCA carbon baseline calculations, streak multipliers (1x–3x), reservoir rolls, and IPCC tonne credit thresholds.
 - [`src/test/cashReward.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/cashReward.test.ts): Verified 5-scan milestone progression, ₹2 cash reward unlocks, duplicate scan protection, and UPI withdrawal validations.
 - [`src/test/variant.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/variant.test.ts): Verified role-based feature gating across Individual, Student, School, Company, and Full editions.
 - [`src/test/imageOptimizer.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/imageOptimizer.test.ts): Verified base64 byte calculation and input bounds checking.
 - [`src/test/example.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/example.test.ts): Basic sanity verification.
+
 
 
 

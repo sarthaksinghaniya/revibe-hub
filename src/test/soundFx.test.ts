@@ -23,6 +23,7 @@ describe("W2W Web Audio SFX & Haptics Engine", () => {
     expect(() => soundFx.playCoinSound()).not.toThrow();
     expect(() => soundFx.playLevelUpFanfare()).not.toThrow();
     expect(() => soundFx.playSuccessTone()).not.toThrow();
+    expect(() => soundFx.playBarcodeBeep()).not.toThrow();
   });
 
   it("suppresses sound output when muted", () => {

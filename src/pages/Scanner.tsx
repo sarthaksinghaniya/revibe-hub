@@ -1,24 +1,28 @@
 import { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, ImageIcon, SwitchCamera } from "lucide-react";
+import { Upload, ImageIcon, SwitchCamera, Sparkles, ScanBarcode } from "lucide-react";
 import { toast } from "sonner";
 import ScanLine from "@/components/Scanner/ScanLine";
 import ScanBrackets from "@/components/Scanner/ScanBrackets";
 import CaptureButton from "@/components/Scanner/CaptureButton";
 import ResultSheet from "@/components/Results/ResultSheet";
+import { BarcodeScannerOverlay } from "@/components/Scanner/BarcodeScannerOverlay";
 import { scanWasteImage, type MultiScanResult } from "@/lib/scanApi";
+import { lookupBarcode, convertBarcodeToMultiScan } from "@/lib/barcodeApi";
 import { optimizeImageForAi } from "@/lib/imageOptimizer";
 import { soundFx } from "@/lib/soundFx";
 
 const Scanner = () => {
   const webcamRef = useRef<Webcam>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [scanMode, setScanMode] = useState<"ai" | "barcode">("ai");
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<MultiScanResult | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState(false);
   const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
+  const [, setVideoReady] = useState(false);
 
   const processImage = async (imageSrc: string) => {
     setIsProcessing(true);
@@ -36,6 +40,23 @@ const Scanner = () => {
     } catch (e) {
       console.error("Scan failed:", e);
       toast.error(e instanceof Error ? e.message : "Failed to analyze image. Try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleBarcodeScanned = async (barcode: string) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      const product = await lookupBarcode(barcode);
+      const scanResult = await convertBarcodeToMultiScan(product, true);
+      setResult(scanResult);
+      soundFx.playCoinSound();
+      toast.success(`Identified ${product.name} via packaging database!`);
+    } catch (e) {
+      console.error("Barcode scan failed:", e);
+      toast.error(e instanceof Error ? e.message : "Failed to read barcode");
     } finally {
       setIsProcessing(false);
     }
@@ -83,6 +104,36 @@ const Scanner = () => {
 
   return (
     <div className="fixed inset-0 bg-background">
+      {/* Top Mode Switcher */}
+      {!result && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center p-1 rounded-full bg-card/90 backdrop-blur-md border border-border shadow-xl">
+          <button
+            type="button"
+            onClick={() => setScanMode("ai")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              scanMode === "ai"
+                ? "bg-primary text-primary-foreground shadow"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Sparkles size={13} />
+            AI Vision
+          </button>
+          <button
+            type="button"
+            onClick={() => setScanMode("barcode")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              scanMode === "barcode"
+                ? "bg-primary text-primary-foreground shadow"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <ScanBarcode size={13} />
+            Barcode / FMCG
+          </button>
+        </div>
+      )}
+
       {/* Camera / Image */}
       <div className="absolute inset-0">
         {capturedImage ? (
@@ -107,16 +158,61 @@ const Scanner = () => {
             screenshotFormat="image/jpeg"
             videoConstraints={{ facingMode }}
             className="w-full h-full object-cover"
+            onUserMedia={() => setVideoReady(true)}
             onUserMediaError={() => setCameraError(true)}
           />
         )}
       </div>
 
-      {/* Scan overlays — hidden while processing or result shown */}
+      {/* Mode Specific Overlays */}
       {!result && !cameraError && (
         <>
-          <ScanLine fast={isProcessing} />
-          <ScanBrackets />
+          {scanMode === "barcode" ? (
+            <BarcodeScannerOverlay
+              videoElement={webcamRef.current?.video || null}
+              onBarcodeScanned={handleBarcodeScanned}
+              isProcessing={isProcessing}
+            />
+          ) : (
+            <>
+              <ScanLine fast={isProcessing} />
+              <ScanBrackets />
+
+              {/* Live badge */}
+              {!isProcessing && (
+                <motion.div
+                  className="absolute top-16 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-card/80 backdrop-blur border border-border"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <span className="text-xs font-data text-muted-foreground">
+                    Point camera at waste item
+                  </span>
+                </motion.div>
+              )}
+
+              {/* Bottom controls */}
+              <div className="absolute bottom-24 left-0 right-0 flex items-center justify-center gap-6 z-20">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-12 h-12 rounded-full bg-card/80 backdrop-blur border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  title="Upload Image from Gallery"
+                  aria-label="Upload Image"
+                >
+                  <Upload size={18} />
+                </button>
+                <CaptureButton onCapture={handleCapture} isProcessing={isProcessing} />
+                <button
+                  onClick={toggleCamera}
+                  className="w-12 h-12 rounded-full bg-card/80 backdrop-blur border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  title="Switch Camera (Front/Back)"
+                  aria-label="Switch Camera"
+                >
+                  <SwitchCamera size={18} />
+                </button>
+              </div>
+            </>
+          )}
         </>
       )}
 
@@ -133,21 +229,8 @@ const Scanner = () => {
         )}
       </AnimatePresence>
 
-      {/* Live badge */}
-      {!result && !cameraError && !isProcessing && (
-        <motion.div
-          className="absolute top-16 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-card/80 backdrop-blur border border-border"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <span className="text-xs font-data text-muted-foreground">
-            Point camera at waste item
-          </span>
-        </motion.div>
-      )}
-
-      {/* Processing indicator */}
-      {isProcessing && (
+      {/* Processing indicator for AI mode */}
+      {isProcessing && scanMode === "ai" && (
         <motion.div
           className="absolute top-16 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-card/80 backdrop-blur border border-primary/50"
           initial={{ opacity: 0 }}
@@ -157,33 +240,6 @@ const Scanner = () => {
             ANALYZING...
           </span>
         </motion.div>
-      )}
-
-      {/* Bottom controls */}
-      {!result && (
-        <div className="absolute bottom-24 left-0 right-0 flex items-center justify-center gap-6 z-20">
-          {!cameraError && (
-            <>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-12 h-12 rounded-full bg-card/80 backdrop-blur border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                title="Upload Image from Gallery"
-                aria-label="Upload Image"
-              >
-                <Upload size={18} />
-              </button>
-              <CaptureButton onCapture={handleCapture} isProcessing={isProcessing} />
-              <button
-                onClick={toggleCamera}
-                className="w-12 h-12 rounded-full bg-card/80 backdrop-blur border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                title="Switch Camera (Front/Back)"
-                aria-label="Switch Camera"
-              >
-                <SwitchCamera size={18} />
-              </button>
-            </>
-          )}
-        </div>
       )}
 
       <input

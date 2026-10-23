@@ -163,6 +163,38 @@ class SoundFxEngine {
       console.debug("Audio play error", e);
     }
   }
+
+  public playBarcodeBeep(): void {
+    if (this.isMuted()) return;
+    this.triggerHaptic([35, 25, 45]);
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      // High crisp register double beep: 1760 Hz (A6) and 2093 Hz (C7)
+      const freqs = [1760, 2093];
+      freqs.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        const startTime = now + idx * 0.06;
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        gain.gain.setValueAtTime(0.28, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.05);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + 0.05);
+      });
+    } catch (e) {
+      console.debug("Audio play error", e);
+    }
+  }
 }
 
 export const soundFx = new SoundFxEngine();

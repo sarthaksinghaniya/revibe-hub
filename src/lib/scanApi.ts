@@ -87,6 +87,19 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
   const scanType: "single" | "multi" =
     groqData.scan_type || (items.length > 1 ? "multi" : "single");
 
+  return await recordProcessedScan(items, scanType, "scan", imgHash);
+}
+
+export async function recordProcessedScan(
+  rawItems: any[],
+  scanType: "single" | "multi" = "single",
+  source: "scan" | "barcode" = "scan",
+  imgHash: string = `scan:${Date.now()}`
+): Promise<MultiScanResult> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const enriched: ScanItem[] = [];
 
   if (user) {
@@ -105,7 +118,7 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
 
     let totalCo2G = 0;
 
-    for (const it of items) {
+    for (const it of rawItems) {
       const cat = String(it.category).toLowerCase() as Category;
       const count = catCounts[cat] || 0;
       const reduced = count >= 3;
@@ -128,7 +141,7 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
           credits_earned: 0,         // CC no longer per-scan
           image_hash: imgHash,
           reduced_credits: reduced,
-          source: "scan",
+          source: source,
         } as any);
       } catch (e) {
         console.warn("Save scan failed", e);
@@ -138,7 +151,7 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
         name: it.name,
         category: cat,
         material: it.material,
-        confidence: it.confidence,
+        confidence: it.confidence ?? 0.95,
         disposal_steps: it.disposal_steps || [],
         upcycle_ideas: it.upcycle_ideas || [],
         co2_saved_kg: co2G / 1000,
@@ -200,14 +213,14 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
   }
 
   // No user — preview-only result
-  for (const it of items) {
+  for (const it of rawItems) {
     const cat = String(it.category).toLowerCase() as Category;
     const co2G = co2GramsForItem(cat, false, Number(it.co2_saved_kg) || 0);
     enriched.push({
       name: it.name,
       category: cat,
       material: it.material,
-      confidence: it.confidence,
+      confidence: it.confidence ?? 0.95,
       disposal_steps: it.disposal_steps || [],
       upcycle_ideas: it.upcycle_ideas || [],
       co2_saved_kg: co2G / 1000,
