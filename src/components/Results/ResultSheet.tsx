@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Share2, RotateCcw, Leaf, ShoppingBag, Building2, Layers, Volume2, VolumeX, Globe, Play, Square, Sparkles, Gift, Truck } from "lucide-react";
+import { MapPin, Share2, RotateCcw, Leaf, ShoppingBag, Building2, Layers, Volume2, VolumeX, Globe, Play, Square, Sparkles, Gift, Truck, Wrench, ChevronRight } from "lucide-react";
 import CategoryBadge from "./CategoryBadge";
 import VideoSuggestions from "./VideoSuggestions";
 import ShareScanModal from "./ShareScanModal";
 import { ScrapPickupModal } from "@/components/ScrapPickupModal";
+import { DiyUpcycleGuideModal } from "./DiyUpcycleGuideModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import type { MultiScanResult, ScanItem } from "@/lib/scanApi";
@@ -85,6 +86,8 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
 
   const [shareOpen, setShareOpen] = useState(false);
   const [scrapOpen, setScrapOpen] = useState(false);
+  const [diyModalOpen, setDiyModalOpen] = useState(false);
+  const [selectedDiyItem, setSelectedDiyItem] = useState<ScanItem | null>(null);
   const [city, setCity] = useState<string>("");
   const [unlockedBanner, setUnlockedBanner] = useState<boolean>(false);
   const registeredScanIdRef = useRef<string | null>(null);
@@ -328,6 +331,23 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
             ))}
           </div>
         )}
+
+        {/* Interactive DIY Maker Guide Trigger */}
+        <button
+          type="button"
+          onClick={() => {
+            stopSpeaking();
+            setSelectedDiyItem(item);
+            setDiyModalOpen(true);
+          }}
+          className="mt-3 w-full flex items-center justify-between p-2.5 rounded-xl bg-category-upcycle/10 border border-category-upcycle/30 text-category-upcycle text-xs font-display font-bold hover:bg-category-upcycle/20 transition-all group"
+        >
+          <span className="flex items-center gap-1.5">
+            <Wrench size={13} />
+            <span>Interactive DIY Upcycling Tutorial</span>
+          </span>
+          <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+        </button>
 
         <div className="mt-3 flex gap-3 text-[10px] font-data text-muted-foreground">
           <span className="flex items-center gap-1"><Leaf size={10} className="text-category-compost" />{item.co2_saved_kg}kg CO₂</span>
@@ -599,6 +619,13 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
         open={scrapOpen}
         onOpenChange={setScrapOpen}
         defaultMaterial={firstItem?.material || firstItem?.name || ""}
+      />
+
+      <DiyUpcycleGuideModal
+        open={diyModalOpen}
+        onOpenChange={setDiyModalOpen}
+        material={selectedDiyItem?.material || firstItem?.material || ""}
+        itemName={selectedDiyItem?.name || firstItem?.name || ""}
       />
     </>
   );

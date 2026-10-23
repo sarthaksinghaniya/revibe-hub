@@ -76,11 +76,19 @@ This document records the architectural improvements, performance optimizations,
   - **Verified Eco-Warrior Badge:** Redeemable credential for LinkedIn and resume showcasing.
   - **My Perks History:** Local redemption vault with 1-click coupon code copying and timestamped ledger.
 
+### H. "Ask EcoBot" Interactive DIY Upcycle Studio & Marketplace Fast-Track
+- **Implementation:** Created [`src/components/Results/DiyUpcycleGuideModal.tsx`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/components/Results/DiyUpcycleGuideModal.tsx) integrated directly into the scan outcome sheet in [`src/components/Results/ResultSheet.tsx`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/components/Results/ResultSheet.tsx):
+  - **Dynamic DIY Project Generator:** Maps detected waste materials (PET Plastic Bottles, Corrugated Cardboard, Glass Jars, Aluminium Cans, E-Waste / Cables, Fabric / Cotton, and General Waste) into step-by-step master upcycling blueprints.
+  - **Equipment & Tool Checklist:** Interactive checkboxes for required safety gear and everyday household tools before starting.
+  - **5-Step Sequential Progress Tracker:** Visual stepper showing step status, estimated step duration, safety warnings (e.g. razor blades, hot glue, edge smoothing), and real-time completion percentage.
+  - **Post-Build Monetization Fast-Track:** Upon reaching 100% completion, users get a 1-click button to list their newly crafted item on the W2W Marketplace (`/marketplace/new`), pre-populating title, suggested pricing (₹150–₹600), and upcycled material description.
+
 ---
 
 ## 3. Reliability & Automated Test Suite
 
-Implemented a comprehensive Vitest unit testing suite in `src/test/` (27 tests, 100% passing):
+Implemented a comprehensive Vitest unit testing suite in `src/test/` (29 tests across 9 test suites, 100% passing):
+- [`src/test/diyGuides.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/diyGuides.test.ts): Verified DIY project catalog coverage for all recyclable material types, required steps (>= 4 per guide), tool lists, and safe fallbacks for unidentified items.
 - [`src/test/carbonPerks.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/carbonPerks.test.ts): Verified perks catalog integrity across vouchers, trees, and certificates, along with redemption history storage.
 - [`src/test/decayTimeline.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/decayTimeline.test.ts): Verified future decomposition year arithmetic, generational spans, century simulation boundaries, and dataset integrity.
 - [`src/test/soundFx.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/soundFx.test.ts): Verified audio synthesizer execution, safety fallbacks in headless environments, haptics invocation, and mute state persistence.
@@ -88,6 +96,8 @@ Implemented a comprehensive Vitest unit testing suite in `src/test/` (27 tests, 
 - [`src/test/cashReward.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/cashReward.test.ts): Verified 5-scan milestone progression, ₹2 cash reward unlocks, duplicate scan protection, and UPI withdrawal validations.
 - [`src/test/variant.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/variant.test.ts): Verified role-based feature gating across Individual, Student, School, Company, and Full editions.
 - [`src/test/imageOptimizer.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/imageOptimizer.test.ts): Verified base64 byte calculation and input bounds checking.
+- [`src/test/example.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/example.test.ts): Basic sanity verification.
+
 
 
 
