@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CO2_PROFILE, G_PER_CC, verifiedTonneCC, co2Equivalents } from "@/lib/co2Formula";
 import { useCashRewards } from "@/hooks/useCashRewards";
 import { soundFx } from "@/lib/soundFx";
+import { CarbonPerksStore } from "@/components/CarbonPerksStore";
 import { toast } from "sonner";
 
 const badges = [
@@ -417,6 +418,16 @@ const CarbonWallet = () => {
                 </div>
               )}
             </div>
+
+            {/* CARBON PERKS & TREE PLANTING STORE */}
+            <CarbonPerksStore
+              userCredits={totalCredits}
+              onDeductCredits={(deducted) => {
+                setCredits((prev: any) =>
+                  prev ? { ...prev, total_credits: Math.max(0, prev.total_credits - deducted) } : prev
+                );
+              }}
+            />
           </>
         )}
       </div>

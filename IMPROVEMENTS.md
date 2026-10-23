@@ -69,16 +69,25 @@ This document records the architectural improvements, performance optimizations,
   - **Century Scrubber Simulation:** Interactive slider allowing users to travel forward in time from 2026 to 3000 AD to visualize which discarded materials vanish vs which remain trapped in landfills.
   - **1-Click Share Impact Stat:** Generates pre-formatted viral social impact quotes with clipboard copy confirmation.
 
+### G. Carbon Credit Perks Store & Tree Planting
+- **Implementation:** Built [`src/components/CarbonPerksStore.tsx`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/components/CarbonPerksStore.tsx) integrated into [`src/pages/CarbonWallet.tsx`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/pages/CarbonWallet.tsx):
+  - **Eco-Brand Discount Vouchers:** Users redeem 40–100 CC for verified promo codes (Bamboo India 25% Off, Daily Dump Composter ₹250 Off, No Nasties Organic 15% Off).
+  - **"Plant a Real Native Tree":** Redeem 250 CC to sponsor a sapling with geo-tagged certificate issuance (SankalpTaru model).
+  - **Verified Eco-Warrior Badge:** Redeemable credential for LinkedIn and resume showcasing.
+  - **My Perks History:** Local redemption vault with 1-click coupon code copying and timestamped ledger.
+
 ---
 
 ## 3. Reliability & Automated Test Suite
 
-Implemented a comprehensive Vitest unit testing suite in `src/test/` (25 tests, 100% passing):
+Implemented a comprehensive Vitest unit testing suite in `src/test/` (27 tests, 100% passing):
+- [`src/test/carbonPerks.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/carbonPerks.test.ts): Verified perks catalog integrity across vouchers, trees, and certificates, along with redemption history storage.
 - [`src/test/decayTimeline.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/decayTimeline.test.ts): Verified future decomposition year arithmetic, generational spans, century simulation boundaries, and dataset integrity.
 - [`src/test/soundFx.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/soundFx.test.ts): Verified audio synthesizer execution, safety fallbacks in headless environments, haptics invocation, and mute state persistence.
 - [`src/test/co2Formula.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/co2Formula.test.ts): Verified LCA carbon baseline calculations, streak multipliers (1x–3x), reservoir rolls, and IPCC tonne credit thresholds.
 - [`src/test/cashReward.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/cashReward.test.ts): Verified 5-scan milestone progression, ₹2 cash reward unlocks, duplicate scan protection, and UPI withdrawal validations.
 - [`src/test/variant.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/variant.test.ts): Verified role-based feature gating across Individual, Student, School, Company, and Full editions.
 - [`src/test/imageOptimizer.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/imageOptimizer.test.ts): Verified base64 byte calculation and input bounds checking.
+
 
 
