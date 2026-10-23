@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import type { MultiScanResult, ScanItem } from "@/lib/scanApi";
 import { getMunicipalRule } from "@/data/municipalRules";
 import { useCashRewards } from "@/hooks/useCashRewards";
+import { soundFx } from "@/lib/soundFx";
 
 // Re-export legacy alias for back-compat
 export type ScanResult = MultiScanResult;
@@ -134,8 +135,10 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
 
     if (registeredScanIdRef.current !== currentScanId) {
       registeredScanIdRef.current = currentScanId;
+      soundFx.playSuccessTone();
       const res = registerScan(currentScanId);
       if (res.unlockedReward) {
+        soundFx.playCoinSound();
         setUnlockedBanner(true);
         toast.success("🎉 ₹2 CASH REWARD UNLOCKED! Added to your wallet.", { duration: 5000 });
       }

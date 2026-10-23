@@ -9,6 +9,7 @@ import CaptureButton from "@/components/Scanner/CaptureButton";
 import ResultSheet from "@/components/Results/ResultSheet";
 import { scanWasteImage, type MultiScanResult } from "@/lib/scanApi";
 import { optimizeImageForAi } from "@/lib/imageOptimizer";
+import { soundFx } from "@/lib/soundFx";
 
 const Scanner = () => {
   const webcamRef = useRef<Webcam>(null);
@@ -42,6 +43,7 @@ const Scanner = () => {
 
   const handleCapture = useCallback(async () => {
     if (isProcessing) return;
+    soundFx.playCameraShutter();
     const imageSrc = webcamRef.current?.getScreenshot();
     if (!imageSrc) {
       toast.error("Could not capture image. Please try again.");

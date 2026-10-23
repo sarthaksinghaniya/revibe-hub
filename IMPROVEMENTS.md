@@ -55,12 +55,22 @@ This document records the architectural improvements, performance optimizations,
   - **Live Scrap Rates:** Real-time benchmark rates for Old Newspaper (₹15/kg), Cardboard (₹10/kg), PET Bottles (₹18/kg), Scrap Iron (₹28/kg), Aluminium (₹115/kg), Brass (₹330/kg), Copper (₹490/kg), and E-Waste (₹50/kg).
   - **Doorstep Booking:** Form to schedule local doorstep recycling pickups with instant payout estimates and CO₂ offset projections.
 
+### E. Web Audio Procedural SFX & Mobile Haptics Engine
+- **Implementation:** Created [`src/lib/soundFx.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/lib/soundFx.ts) using HTML5 Web Audio API waveform oscillators:
+  - *Camera Snap:* High-frequency transient click + filtered burst on scan capture in `Scanner.tsx`.
+  - *Coin Clink:* Dual harmonic sine wave (987 Hz / 1318 Hz) when ₹2 cash rewards are unlocked in `ResultSheet.tsx` and on UPI withdrawals in `CarbonWallet.tsx`.
+  - *Level-Up Fanfare:* Major triad arpeggio for rank milestones.
+  - *Haptics:* `navigator.vibrate([20, 30, 20])` integration for tactile smartphone feedback.
+  - *Zero Asset Footprint:* 100% synthesized in code (0 kB audio files downloaded).
+
 ---
 
 ## 3. Reliability & Automated Test Suite
 
-Implemented a comprehensive Vitest unit testing suite in `src/test/` (17 tests, 100% passing):
+Implemented a comprehensive Vitest unit testing suite in `src/test/` (21 tests, 100% passing):
+- [`src/test/soundFx.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/soundFx.test.ts): Verified audio synthesizer execution, safety fallbacks in headless environments, haptics invocation, and mute state persistence.
 - [`src/test/co2Formula.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/co2Formula.test.ts): Verified LCA carbon baseline calculations, streak multipliers (1x–3x), reservoir rolls, and IPCC tonne credit thresholds.
 - [`src/test/cashReward.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/cashReward.test.ts): Verified 5-scan milestone progression, ₹2 cash reward unlocks, duplicate scan protection, and UPI withdrawal validations.
 - [`src/test/variant.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/variant.test.ts): Verified role-based feature gating across Individual, Student, School, Company, and Full editions.
 - [`src/test/imageOptimizer.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/imageOptimizer.test.ts): Verified base64 byte calculation and input bounds checking.
+

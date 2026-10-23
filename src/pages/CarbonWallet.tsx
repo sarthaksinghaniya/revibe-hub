@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CO2_PROFILE, G_PER_CC, verifiedTonneCC, co2Equivalents } from "@/lib/co2Formula";
 import { useCashRewards } from "@/hooks/useCashRewards";
+import { soundFx } from "@/lib/soundFx";
 import { toast } from "sonner";
 
 const badges = [
@@ -92,6 +93,7 @@ const CarbonWallet = () => {
       const res = withdrawUPI(amt, upiId);
       setIsSubmittingWithdrawal(false);
       if (res.success) {
+        soundFx.playCoinSound();
         toast.success(res.message, { duration: 6000 });
         setWithdrawModalOpen(false);
         setWithdrawAmount("");
