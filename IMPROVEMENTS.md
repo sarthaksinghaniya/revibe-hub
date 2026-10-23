@@ -63,14 +63,22 @@ This document records the architectural improvements, performance optimizations,
   - *Haptics:* `navigator.vibrate([20, 30, 20])` integration for tactile smartphone feedback.
   - *Zero Asset Footprint:* 100% synthesized in code (0 kB audio files downloaded).
 
+### F. Interactive "Time Machine" on Decay Timeline
+- **Implementation:** Enhanced [`src/components/DecayTimeline.tsx`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/components/DecayTimeline.tsx) with a dual-mode engine:
+  - **Dynamic Year Math:** Displays the exact calendar year waste will disappear ($2026 + \text{lifespan}$), e.g., Plastic Bottles persist until **2476 AD**, spanning **18 human generations**.
+  - **Century Scrubber Simulation:** Interactive slider allowing users to travel forward in time from 2026 to 3000 AD to visualize which discarded materials vanish vs which remain trapped in landfills.
+  - **1-Click Share Impact Stat:** Generates pre-formatted viral social impact quotes with clipboard copy confirmation.
+
 ---
 
 ## 3. Reliability & Automated Test Suite
 
-Implemented a comprehensive Vitest unit testing suite in `src/test/` (21 tests, 100% passing):
+Implemented a comprehensive Vitest unit testing suite in `src/test/` (25 tests, 100% passing):
+- [`src/test/decayTimeline.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/decayTimeline.test.ts): Verified future decomposition year arithmetic, generational spans, century simulation boundaries, and dataset integrity.
 - [`src/test/soundFx.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/soundFx.test.ts): Verified audio synthesizer execution, safety fallbacks in headless environments, haptics invocation, and mute state persistence.
 - [`src/test/co2Formula.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/co2Formula.test.ts): Verified LCA carbon baseline calculations, streak multipliers (1x–3x), reservoir rolls, and IPCC tonne credit thresholds.
 - [`src/test/cashReward.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/cashReward.test.ts): Verified 5-scan milestone progression, ₹2 cash reward unlocks, duplicate scan protection, and UPI withdrawal validations.
 - [`src/test/variant.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/variant.test.ts): Verified role-based feature gating across Individual, Student, School, Company, and Full editions.
 - [`src/test/imageOptimizer.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/imageOptimizer.test.ts): Verified base64 byte calculation and input bounds checking.
+
 
