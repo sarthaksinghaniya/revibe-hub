@@ -137,3 +137,29 @@
     z-index: 1;
   }
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #w2w-printable-certificate,
+  #w2w-printable-certificate * {
+    visibility: visible;
+  }
+  #w2w-printable-certificate {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    margin: 0;
+    padding: 28px !important;
+    border: 4px double #059669 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+

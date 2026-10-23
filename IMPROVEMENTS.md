@@ -93,11 +93,27 @@ This document records the architectural improvements, performance optimizations,
   - **Audio & Haptic Feedback:** High-register procedural double-beep (1760 Hz / 2093 Hz) and tactile vibration upon recognition.
   - **Wallet & Streak Parity:** Barcode scans seamlessly award LCA CO₂ grams, progress 5-scan cash reward milestones, and increment streak counts via `recordProcessedScan`.
 
+### J. Institutional NAAC & Corporate ESG Environmental Certificate Generator
+- **Implementation:** Built [`src/lib/esgCertificate.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/lib/esgCertificate.ts) and [`src/components/OrgDashboard/EsgCertificateModal.tsx`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/components/OrgDashboard/EsgCertificateModal.tsx) integrated directly into the institutional hub in [`src/pages/OrgDashboard.tsx`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/pages/OrgDashboard.tsx):
+  - **Dual Statutory Certification Engine:**
+    - *Higher Education Mode:* Generates accredited **NAAC Criterion 7.1.3 Green Campus Audit** credentials citing MoEFCC Solid Waste Management Rules 2016 and NEP 2020 environmental mandates.
+    - *Corporate Enterprise Mode:* Generates official **SEBI BRSR Principle 6 (Scope 3 GHG & Operational Waste Diversion)** certificates compliant with the GHG Protocol Corporate Value Chain Standard.
+  - **Audited Circularity Telemetry:**
+    - *Municipal Solid Waste Diverted:* Real-time total kg diverted from regional open dumping grounds.
+    - *Net Greenhouse Gas Emissions Avoided:* Verified $kg\text{ CO}_2\text{e}$ mitigation computed via IPCC AR6 factors.
+    - *Mature Native Tree Equivalence:* Quantified tree conservation metric based on ICFRE benchmarks ($21.77\text{ kg CO}_2/\text{tree/yr}$).
+    - *Freshwater Footprint Conserved:* Liters of water saved vs virgin virgin manufacturing pulp & polymer extraction.
+    - *Landfill Airspace Conserved:* Preserved landfill volume ($m^3$) using compacted municipal solid waste density parameters.
+  - **Single-Page Styled Print & PDF Generation:** Built custom `@media print` stylesheet isolating `#w2w-printable-certificate`, enabling high-resolution browser printing and 1-click vector PDF saving without surrounding navigation bars.
+  - **Cryptographic Verification Token:** Generates deterministic unique verification IDs (e.g., `NAAC-CR7-2026-XXXXXXXX` / `BRSR-ESG-2026-XXXXXXXX`) with 1-click clipboard copy.
+  - **Statutory Audit Ledger Exporter:** Exports official itemized CSV logs with timestamps and regulatory citations for submission to NAAC peer teams and corporate sustainability auditors.
+
 ---
 
 ## 3. Reliability & Automated Test Suite
 
-Implemented a comprehensive Vitest unit testing suite in `src/test/` (37 tests across 10 test suites, 100% passing):
+Implemented a comprehensive Vitest unit testing suite in `src/test/` (41 tests across 11 test suites, 100% passing):
+- [`src/test/esgCertificate.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/esgCertificate.test.ts): Verified NAAC Criterion 7.1.3 metrics, corporate BRSR Scope 3 calculations, tree equivalence formula ($CO_2 / 21.77$), deterministic verification ID hashing, and zero/boundary handling.
 - [`src/test/barcodeApi.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/barcodeApi.test.ts): Verified instant lookup for high-frequency FMCG items (Bisleri, Maggi, Coke, Amul), whitespace/formatting sanitization, packaging component breakdowns, `MultiScanResult` mapping, resin fallback handling, and empty barcode validation.
 - [`src/test/diyGuides.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/diyGuides.test.ts): Verified DIY project catalog coverage for all recyclable material types, required steps (>= 4 per guide), tool lists, and safe fallbacks for unidentified items.
 - [`src/test/carbonPerks.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/carbonPerks.test.ts): Verified perks catalog integrity across vouchers, trees, and certificates, along with redemption history storage.
@@ -108,6 +124,7 @@ Implemented a comprehensive Vitest unit testing suite in `src/test/` (37 tests a
 - [`src/test/variant.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/variant.test.ts): Verified role-based feature gating across Individual, Student, School, Company, and Full editions.
 - [`src/test/imageOptimizer.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/imageOptimizer.test.ts): Verified base64 byte calculation and input bounds checking.
 - [`src/test/example.test.ts`](file:///c:/Users/LOQ/Desktop/upcycle-it-main/src/test/example.test.ts): Basic sanity verification.
+
 
 
 

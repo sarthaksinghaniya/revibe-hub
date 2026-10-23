@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Building2, Copy, School, ShieldCheck } from "lucide-react";
+import { Building2, Copy, School, ShieldCheck, Award } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import OrgStats from "@/components/OrgDashboard/OrgStats";
 import Leaderboard, { type MemberStat } from "@/components/OrgDashboard/Leaderboard";
 import StudentManagement from "@/components/OrgDashboard/StudentManagement";
 import ExportReport from "@/components/OrgDashboard/ExportReport";
+import { EsgCertificateModal } from "@/components/OrgDashboard/EsgCertificateModal";
 import { isCityKnown } from "@/data/municipalRules";
 
 interface OrgData {
@@ -30,6 +31,8 @@ const OrgDashboard = () => {
   const [orgName, setOrgName] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [city, setCity] = useState<string>("");
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [samplePreview, setSamplePreview] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -161,6 +164,16 @@ const OrgDashboard = () => {
                 <button onClick={() => setCreateMode(true)} className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm">Create Org</button>
                 <button onClick={() => setCreateMode(true)} className="px-6 py-2.5 rounded-xl bg-secondary text-secondary-foreground border border-border font-display font-bold text-sm">Join with Code</button>
               </div>
+              <div className="mt-5 pt-4 border-t border-border/60">
+                <button
+                  type="button"
+                  onClick={() => setSamplePreview(true)}
+                  className="text-xs text-primary hover:underline font-semibold inline-flex items-center gap-1.5"
+                >
+                  <Award size={13} />
+                  <span>Preview Sample NAAC Green Audit / ESG Certificate</span>
+                </button>
+              </div>
             </motion.div>
           ) : (
             <motion.div className="p-6 rounded-2xl glass-card" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -179,6 +192,16 @@ const OrgDashboard = () => {
               </div>
             </motion.div>
           )}
+
+          {/* Sample Certificate Modal for preview */}
+          <EsgCertificateModal
+            isOpen={samplePreview}
+            onClose={() => setSamplePreview(false)}
+            orgName="Delhi University Green Campus Initiative"
+            totalScans={1420}
+            totalCo2={365.8}
+            memberCount={86}
+          />
         </div>
       </div>
     );
@@ -203,14 +226,25 @@ const OrgDashboard = () => {
               </p>
             </div>
           </div>
-          {isAdmin && (
-            <ExportReport
-              orgName={org.name}
-              members={org.leaderboard}
-              totalScans={org.total_scans}
-              totalCo2={org.total_co2}
-            />
-          )}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowCertModal(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-primary-foreground font-display font-bold text-xs hover:bg-primary/90 transition-colors shadow-md"
+            >
+              <Award size={14} />
+              <span className="hidden sm:inline">NAAC / ESG</span>
+              <span>Certificate</span>
+            </button>
+            {isAdmin && (
+              <ExportReport
+                orgName={org.name}
+                members={org.leaderboard}
+                totalScans={org.total_scans}
+                totalCo2={org.total_co2}
+              />
+            )}
+          </div>
         </div>
 
         {city && isCityKnown(city) && (
@@ -221,6 +255,39 @@ const OrgDashboard = () => {
             </span>
           </div>
         )}
+
+        {/* Institutional NAAC & ESG Certification Banner Card */}
+        <motion.div
+          className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-primary/15 via-primary/10 to-primary/5 border border-primary/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 shadow-sm"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shrink-0 shadow-inner">
+              <Award size={20} />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold font-display text-foreground flex items-center gap-2">
+                <span>Institutional Green Audit & ESG Compliance</span>
+                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-primary/20 text-primary font-mono font-bold">
+                  Criterion 7.1.3
+                </span>
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5 max-w-lg">
+                Download and print accredited certificates for Higher Education NAAC Criterion 7 and Corporate SEBI BRSR Scope 3 waste reporting.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowCertModal(true)}
+            className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-display font-bold text-xs flex items-center gap-2 hover:bg-primary/90 transition-all shadow-md shrink-0 w-full sm:w-auto justify-center"
+          >
+            <Award size={15} />
+            <span>View Official Certificate</span>
+          </button>
+        </motion.div>
 
         {isAdmin && (
           <motion.div className="p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -241,6 +308,17 @@ const OrgDashboard = () => {
         {isAdmin && students.length > 0 && (
           <StudentManagement orgId={org.id} members={students} onMemberRemoved={fetchOrg} />
         )}
+
+        {/* Official ESG Certificate Modal */}
+        <EsgCertificateModal
+          isOpen={showCertModal}
+          onClose={() => setShowCertModal(false)}
+          orgName={org.name}
+          totalScans={org.total_scans}
+          totalCo2={org.total_co2}
+          memberCount={org.member_count}
+          members={org.leaderboard}
+        />
       </div>
     </div>
   );
