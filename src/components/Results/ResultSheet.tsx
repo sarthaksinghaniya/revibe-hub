@@ -7,12 +7,15 @@ import VideoSuggestions from "./VideoSuggestions";
 import ShareScanModal from "./ShareScanModal";
 import { ScrapPickupModal } from "@/components/ScrapPickupModal";
 import { DiyUpcycleGuideModal } from "./DiyUpcycleGuideModal";
+import { UpcycleStudioModal } from "@/components/WebAR/UpcycleStudioModal";
+import { RevibeDecisionStepper } from "./RevibeDecisionStepper";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import type { MultiScanResult, ScanItem } from "@/lib/scanApi";
 import { getMunicipalRule } from "@/data/municipalRules";
 import { useCashRewards } from "@/hooks/useCashRewards";
 import { soundFx } from "@/lib/soundFx";
+import { Move3d } from "lucide-react";
 
 // Re-export legacy alias for back-compat
 export type ScanResult = MultiScanResult;
@@ -88,6 +91,8 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
   const [scrapOpen, setScrapOpen] = useState(false);
   const [diyModalOpen, setDiyModalOpen] = useState(false);
   const [selectedDiyItem, setSelectedDiyItem] = useState<ScanItem | null>(null);
+  const [studioOpen, setStudioOpen] = useState(false);
+  const [selectedStudioItem, setSelectedStudioItem] = useState<ScanItem | null>(null);
   const [city, setCity] = useState<string>("");
   const [unlockedBanner, setUnlockedBanner] = useState<boolean>(false);
   const registeredScanIdRef = useRef<string | null>(null);
@@ -332,22 +337,63 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
           </div>
         )}
 
-        {/* Interactive DIY Maker Guide Trigger */}
-        <button
-          type="button"
-          onClick={() => {
-            stopSpeaking();
-            setSelectedDiyItem(item);
-            setDiyModalOpen(true);
-          }}
-          className="mt-3 w-full flex items-center justify-between p-2.5 rounded-xl bg-category-upcycle/10 border border-category-upcycle/30 text-category-upcycle text-xs font-display font-bold hover:bg-category-upcycle/20 transition-all group"
-        >
-          <span className="flex items-center gap-1.5">
-            <Wrench size={13} />
-            <span>Interactive DIY Upcycling Tutorial</span>
-          </span>
-          <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-        </button>
+        {/* The 6-Stage Revibe Decision Pathway */}
+        <div className="mt-4">
+          <RevibeDecisionStepper
+            item={item}
+            score={result.waste_score || item.confidence || 85}
+            milestoneCount={currentMilestone}
+            onOpen3dStudio={() => {
+              stopSpeaking();
+              setSelectedStudioItem(item);
+              setStudioOpen(true);
+            }}
+            onOpenScrapPickup={() => {
+              stopSpeaking();
+              setScrapOpen(true);
+            }}
+            onOpenExchange={() => {
+              stopSpeaking();
+              onClose();
+              navigate('/marketplace');
+            }}
+          />
+        </div>
+
+        {/* Dual Maker Triggers: 3D Web-AR Studio & DIY Tutorial */}
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              stopSpeaking();
+              setSelectedStudioItem(item);
+              setStudioOpen(true);
+            }}
+            className="w-full flex items-center justify-between p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-display font-bold hover:bg-emerald-500/20 transition-all group"
+          >
+            <span className="flex items-center gap-1.5">
+              <Move3d size={14} />
+              <span>3D Web-AR Studio</span>
+            </span>
+            <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              stopSpeaking();
+              setSelectedDiyItem(item);
+              setDiyModalOpen(true);
+            }}
+            className="w-full flex items-center justify-between p-2.5 rounded-xl bg-category-upcycle/10 border border-category-upcycle/30 text-category-upcycle text-xs font-display font-bold hover:bg-category-upcycle/20 transition-all group"
+          >
+            <span className="flex items-center gap-1.5">
+              <Wrench size={14} />
+              <span>DIY Blueprint Guide</span>
+            </span>
+            <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
 
         <div className="mt-3 flex gap-3 text-[10px] font-data text-muted-foreground">
           <span className="flex items-center gap-1"><Leaf size={10} className="text-category-compost" />{item.co2_saved_kg}kg CO₂</span>
@@ -626,6 +672,12 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
         onOpenChange={setDiyModalOpen}
         material={selectedDiyItem?.material || firstItem?.material || ""}
         itemName={selectedDiyItem?.name || firstItem?.name || ""}
+      />
+
+      <UpcycleStudioModal
+        wasteNameOrMaterial={selectedStudioItem?.name || selectedStudioItem?.material || firstItem?.material || firstItem?.name || "plastic bottle"}
+        isOpen={studioOpen}
+        onClose={() => setStudioOpen(false)}
       />
     </>
   );

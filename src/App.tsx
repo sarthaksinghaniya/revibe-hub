@@ -21,6 +21,7 @@ const MarketplaceNew = lazy(() => import("./pages/MarketplaceNew"));
 const MarketplaceDetail = lazy(() => import("./pages/MarketplaceDetail"));
 const MyListings = lazy(() => import("./pages/MyListings"));
 const Friends = lazy(() => import("./pages/Friends"));
+const Messages = lazy(() => import("./pages/Messages"));
 const Download = lazy(() => import("./pages/Download"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="/marketplace/my" element={<MyListings />} />
                 <Route path="/marketplace/:id" element={<MarketplaceDetail />} />
                 <Route path="/friends" element={<Friends />} />
+                <Route path="/messages" element={<Messages />} />
                 <Route path="/download" element={<Download />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

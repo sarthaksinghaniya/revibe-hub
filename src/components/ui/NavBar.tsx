@@ -15,6 +15,7 @@ import {
   Menu,
   LogOut,
   ChevronRight,
+  MessageCircle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
@@ -41,6 +42,7 @@ const NavBar = () => {
     { path: "/", icon: Home, label: "Home" },
     { path: "/scan", icon: Camera, label: "Scan", feature: "scanner" },
     { path: "/marketplace", icon: ShoppingBag, label: "Marketplace", feature: "marketplace" },
+    { path: "/messages", icon: MessageCircle, label: "Messages" },
     { path: "/facilities", icon: Map, label: "Facilities", feature: "facilities" },
     ...(user
       ? [

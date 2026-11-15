@@ -6,6 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import DecayTimeline from "@/components/DecayTimeline";
+import { InstagramDmModal } from "@/components/Chat/InstagramDmModal";
+import { startOrGetConversation } from "@/lib/chatStorage";
+import type { ChatConversation } from "@/types/chat";
+import { Sparkles } from "lucide-react";
 
 interface Listing {
   id: string;
@@ -36,6 +40,24 @@ const MarketplaceDetail = () => {
   const [similar, setSimilar] = useState<Listing[]>([]);
   const [sellerName, setSellerName] = useState<string | null>(null);
   const [sellerSince, setSellerSince] = useState<string | null>(null);
+  const [dmOpen, setDmOpen] = useState(false);
+  const [activeConv, setActiveConv] = useState<ChatConversation | null>(null);
+
+  const handleOpenDm = () => {
+    if (!listing) return;
+    const conv = startOrGetConversation({
+      id: listing.id,
+      title: listing.title,
+      price: listing.price,
+      is_free: listing.is_free,
+      images: listing.images || [],
+      waste_type: listing.waste_type || undefined,
+      seller_id: listing.user_id,
+      seller_name: sellerName || "Eco Maker",
+    });
+    setActiveConv(conv);
+    setDmOpen(true);
+  };
 
   useEffect(() => {
     if (id) fetchListing();
@@ -213,27 +235,44 @@ const MarketplaceDetail = () => {
         </div>
 
         {/* CTAs */}
-        <div className="flex gap-3 mb-6">
-          {listing.contact_whatsapp && (
-            <a
-              href={`https://wa.me/${listing.contact_whatsapp.replace(/\D/g, "")}?text=Hi! I'm interested in your listing "${listing.title}" on W2W Marketplace`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[#25D366] text-white font-display font-bold text-sm"
-            >
-              <MessageCircle size={16} />
-              WhatsApp
-            </a>
-          )}
-          {listing.contact_email && (
-            <a
-              href={`mailto:${listing.contact_email}?subject=Interested in: ${listing.title}&body=Hi, I found your listing on W2W Marketplace and I'm interested!`}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary text-secondary-foreground border border-border font-display font-bold text-sm"
-            >
-              <Mail size={16} />
-              Email
-            </a>
-          )}
+        <div className="space-y-2.5 mb-6">
+          {/* Primary In-App Instagram DM Button */}
+          <motion.button
+            onClick={handleOpenDm}
+            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-zinc-950 font-display font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 hover:opacity-95 transition-all"
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+          >
+            <MessageCircle size={18} />
+            <span>Chat to Exchange (Smart DM)</span>
+            <span className="text-[10px] font-data font-semibold bg-zinc-950/20 text-zinc-950 px-2 py-0.5 rounded-full uppercase tracking-wider">
+              Instant
+            </span>
+          </motion.button>
+
+          {/* Secondary External Channels */}
+          <div className="flex gap-2.5">
+            {listing.contact_whatsapp && (
+              <a
+                href={`https://wa.me/${listing.contact_whatsapp.replace(/\D/g, "")}?text=Hi! I'm interested in your listing "${listing.title}" on W2W Marketplace`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#25D366] text-white font-display font-bold text-xs"
+              >
+                <MessageCircle size={15} />
+                WhatsApp
+              </a>
+            )}
+            {listing.contact_email && (
+              <a
+                href={`mailto:${listing.contact_email}?subject=Interested in: ${listing.title}&body=Hi, I found your listing on W2W Marketplace and I'm interested!`}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-secondary text-secondary-foreground border border-border font-display font-bold text-xs"
+              >
+                <Mail size={15} />
+                Email
+              </a>
+            )}
+          </div>
         </div>
 
         {/* Decay Timeline for waste_type */}
@@ -276,6 +315,13 @@ const MarketplaceDetail = () => {
           </div>
         )}
       </div>
+
+      {/* Instagram-Style Direct Messaging Modal */}
+      <InstagramDmModal
+        conversation={activeConv}
+        isOpen={dmOpen}
+        onClose={() => setDmOpen(false)}
+      />
     </div>
   );
 };
