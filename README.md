@@ -1,4 +1,4 @@
-# Upcycle It — W2W
+# Revibe Hub
 
 > AI-powered waste identification, circular economy tracking, and upcycling guidance that turns garbage into value.
 
@@ -7,6 +7,7 @@ The project is a mobile-first waste intelligence platform designed to help users
 ## Point of Contact
 - Website: https://techneekx.in
 - Project contact: techneekx.in
+- Contact : +91 6387860126 
 
 ---
 
